@@ -215,6 +215,8 @@ div[data-testid="stTextArea"] textarea {
 </style>
 """
 
+LOW_CONF_THRESHOLD = 0.08
+
 
 st.set_page_config(page_title="中文 AI / 人類 文本判別器", layout="wide")
 st.markdown(THEME_CSS, unsafe_allow_html=True)
@@ -302,7 +304,7 @@ def main():
         st.subheader("模型資訊")
         st.write("基線模型（TF-IDF + Logistic Regression / SVM）")
         st.subheader("推論設定")
-        margin_threshold = st.slider("低信心門檻", 0.05, 0.3, 0.12, 0.01)
+        st.write(f"低信心門檻：{LOW_CONF_THRESHOLD:.0%}")
     try:
         predictor = get_predictor(str(model_dir))
     except InferenceError as exc:
@@ -336,8 +338,8 @@ def main():
         label_col, conf_col, prob_col = st.columns([1.1, 1.1, 1.8])
         margin = abs(out["ai_prob"] - out["human_prob"])
         label_text = "人類" if out["label"] == "Human" else out["label"]
-        if margin < margin_threshold:
-            label_text = "不確定"
+        if margin < LOW_CONF_THRESHOLD:
+            label_text = "低信心 · 不確定"
         label_col.markdown(
             f"""
             <div class="stat-card card-label">
@@ -374,8 +376,12 @@ def main():
             unsafe_allow_html=True,
         )
 
-        if margin < margin_threshold:
-            st.info("目前判別差距較小，建議提供更長或更具體的文本。")
+        if margin < LOW_CONF_THRESHOLD:
+            st.warning(
+                f"低信心：AI 與人類機率差距 {margin_pct:.1f}% "
+                f"< 門檻 {LOW_CONF_THRESHOLD * 100:.0f}%。"
+            )
+            st.info("建議提供更長或更具體的文本，以提高辨識度。")
         st.markdown("</div>", unsafe_allow_html=True)
 
         st.markdown(
