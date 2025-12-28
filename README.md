@@ -1,5 +1,7 @@
 # 中英文 AI vs Human 分類器（Baseline）
 
+Demo: https://healinganimal-mc55cew8quapyj4gwt3fbg.streamlit.app/
+
 本專案為中英文文字的基線分類器，並提供 Streamlit 介面即時推論。繁體與簡體中文一律視為同一類中文文本處理。訓練時可選擇合併英文參考資料集，形成中英混合的分類模型。
 
 ## 安裝
