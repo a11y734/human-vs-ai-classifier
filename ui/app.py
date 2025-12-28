@@ -305,8 +305,9 @@ def main():
         margin_threshold = st.slider("低信心門檻", 0.05, 0.3, 0.12, 0.01)
     try:
         predictor = get_predictor(str(model_dir))
-    except InferenceError:
+    except InferenceError as exc:
         st.warning("找不到模型 artifacts。")
+        st.code(str(exc))
         st.info(
             "請先訓練模型，例如：`python -m src.train --input-dir "
             "refs/chatgpt-comparison-detection/china-data`。"

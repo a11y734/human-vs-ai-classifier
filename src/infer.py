@@ -23,8 +23,16 @@ class Predictor:
             raise InferenceError(str(exc)) from exc
 
         self.paths = paths
-        self.vectorizer = joblib.load(paths["vectorizer"])
-        self.clf = joblib.load(paths["model"])
+        try:
+            self.vectorizer = joblib.load(paths["vectorizer"])
+        except FileNotFoundError as exc:
+            raise InferenceError(
+                f"Missing vectorizer at {paths.get('vectorizer')}"
+            ) from exc
+        try:
+            self.clf = joblib.load(paths["model"])
+        except FileNotFoundError as exc:
+            raise InferenceError(f"Missing model at {paths.get('model')}") from exc
         self.metadata = {}
         meta_path = paths.get("metadata")
         if meta_path and meta_path.exists():

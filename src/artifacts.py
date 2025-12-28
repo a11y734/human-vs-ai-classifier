@@ -84,6 +84,24 @@ def resolve_latest(model_dir: Path, backend: str) -> Dict[str, Path]:
                         "dataset_stats": metrics_dir / "dataset_stats.json",
                         "run_dir": run_dir,
                     }
+        if model_dir.exists():
+            candidates = sorted(
+                [path for path in model_dir.rglob("vectorizer.joblib")],
+                reverse=True,
+            )
+            for vectorizer in candidates:
+                run_dir = vectorizer.parent
+                model = run_dir / "model.joblib"
+                if model.exists():
+                    metrics_dir = run_dir / "metrics"
+                    return {
+                        "vectorizer": vectorizer,
+                        "model": model,
+                        "metadata": run_dir / "metadata.json",
+                        "metrics": metrics_dir / "metrics.json",
+                        "dataset_stats": metrics_dir / "dataset_stats.json",
+                        "run_dir": run_dir,
+                    }
 
     legacy_vectorizer = model_dir / "tfidf_char.joblib"
     legacy_model = model_dir / "logreg_model.joblib"
