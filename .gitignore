@@ -2,6 +2,3 @@
 __pycache__/
 *.pyc
 *.pyo
-models/
-refs/chatgpt-comparison-detection/
-refs/human-vs-ai-text-classifier/

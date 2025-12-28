@@ -1,0 +1,20 @@
+{
+  "algorithm": "logreg",
+  "analyzer": "char",
+  "ngram_range": [
+    2,
+    5
+  ],
+  "seed": 42,
+  "include_english": false,
+  "ref_dataset_path": null,
+  "normalize_zh": true,
+  "label_map": {
+    "Human": 0,
+    "AI": 1
+  },
+  "class_names": {
+    "0": "Human",
+    "1": "AI"
+  }
+}

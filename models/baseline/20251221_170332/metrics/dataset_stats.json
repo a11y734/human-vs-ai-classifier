@@ -1,0 +1,14 @@
+{
+  "total_samples": 10,
+  "class_counts": {
+    "AI": 8,
+    "Human": 2
+  },
+  "text_length": {
+    "min": 162,
+    "mean": 540.0,
+    "median": 578.0,
+    "p95": 862.5999999999999,
+    "max": 895
+  }
+}
