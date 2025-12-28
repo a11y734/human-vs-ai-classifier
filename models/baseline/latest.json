@@ -1,10 +1,10 @@
 {
-  "run_id": "20251221_191332",
+  "run_id": "20251228_024712",
   "paths": {
-    "vectorizer": "20251221_191332\\vectorizer.joblib",
-    "model": "20251221_191332\\model.joblib",
-    "metadata": "20251221_191332\\metadata.json",
-    "metrics": "20251221_191332\\metrics\\metrics.json",
-    "dataset_stats": "20251221_191332\\metrics\\dataset_stats.json"
+    "vectorizer": "20251228_024712/vectorizer.joblib",
+    "model": "20251228_024712/model.joblib",
+    "metadata": "20251228_024712/metadata.json",
+    "metrics": "20251228_024712/metrics/metrics.json",
+    "dataset_stats": "20251228_024712/metrics/dataset_stats.json"
   }
 }
