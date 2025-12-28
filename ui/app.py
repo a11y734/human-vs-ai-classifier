@@ -296,7 +296,8 @@ def metrics_section(paths: dict):
 
 
 def main():
-    model_dir = Path("models")
+    repo_root = Path(__file__).resolve().parents[1]
+    model_dir = repo_root / "models"
     with st.sidebar:
         st.subheader("模型資訊")
         st.write("基線模型（TF-IDF + Logistic Regression / SVM）")
