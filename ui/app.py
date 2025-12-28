@@ -153,10 +153,21 @@ html, body, [class*="css"]  {
   gap: 12px;
   padding: 16px 20px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.45);
   box-shadow: var(--shadow);
   margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
   animation: fadeUp 0.6s ease-out both;
+}
+
+.result-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 10% 10%, rgba(255, 255, 255, 0.25), transparent 55%);
+  opacity: 0.8;
+  pointer-events: none;
 }
 
 .result-banner.result-ai {
@@ -175,9 +186,17 @@ html, body, [class*="css"]  {
 }
 
 .result-title {
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 14px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.result-flag {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin-top: 4px;
 }
 
 .result-meta {
@@ -267,8 +286,8 @@ div[data-testid="stTextArea"] textarea {
   .hero h1 {
     font-size: 26px;
   }
-  .result-title {
-    font-size: 26px;
+  .result-flag {
+    font-size: 28px;
   }
 }
 
@@ -413,12 +432,12 @@ def main():
         if low_conf:
             result_label = "不確定"
             label_text = "低信心 · 不確定"
-            confidence_tag = "低信心"
+            confidence_tag = "LOW CONFIDENCE"
             result_class = "result-uncertain"
         else:
             result_label = "人類" if out["label"] == "Human" else "AI"
-            label_text = result_label
-            confidence_tag = "高信心"
+            label_text = f"判定：{result_label}"
+            confidence_tag = "HIGH CONFIDENCE"
             result_class = "result-human" if out["label"] == "Human" else "result-ai"
         st.markdown(
             """
@@ -432,7 +451,8 @@ def main():
             f"""
             <div class="result-banner {result_class}">
               <div>
-                <div class="result-title">{result_label}</div>
+                <div class="result-title">Final Decision</div>
+                <div class="result-flag">{result_label}</div>
                 <div class="result-meta">AI {ai_pct:.1f}% · 人類 {human_pct:.1f}% · 差距 {margin_pct:.1f}%</div>
               </div>
               <div class="result-chip">{confidence_tag}</div>
