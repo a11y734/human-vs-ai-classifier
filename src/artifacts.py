@@ -40,11 +40,11 @@ def write_latest(model_dir: Path, backend: str, bundle: ArtifactBundle) -> None:
     data = {
         "run_id": bundle.run_dir.name,
         "paths": {
-            "vectorizer": str(bundle.vectorizer_path.relative_to(backend_dir)),
-            "model": str(bundle.model_path.relative_to(backend_dir)),
-            "metadata": str(bundle.metadata_path.relative_to(backend_dir)),
-            "metrics": str(bundle.metrics_path.relative_to(backend_dir)),
-            "dataset_stats": str(bundle.dataset_stats_path.relative_to(backend_dir)),
+            "vectorizer": bundle.vectorizer_path.relative_to(backend_dir).as_posix(),
+            "model": bundle.model_path.relative_to(backend_dir).as_posix(),
+            "metadata": bundle.metadata_path.relative_to(backend_dir).as_posix(),
+            "metrics": bundle.metrics_path.relative_to(backend_dir).as_posix(),
+            "dataset_stats": bundle.dataset_stats_path.relative_to(backend_dir).as_posix(),
         },
     }
     with open(backend_dir / "latest.json", "w", encoding="utf-8") as f:
@@ -61,8 +61,29 @@ def resolve_latest(model_dir: Path, backend: str) -> Dict[str, Path]:
             k: str(v).replace("\\", "/") for k, v in data.get("paths", {}).items()
         }
         paths = {k: backend_dir / v for k, v in normalized.items()}
-        paths["run_dir"] = backend_dir / data.get("run_id", "")
-        return paths
+        paths["run_dir"] = backend_dir / str(data.get("run_id", "")).strip()
+        required = ("vectorizer", "model")
+        if all(paths.get(key) and paths[key].exists() for key in required):
+            return paths
+
+        if backend_dir.exists():
+            candidates = sorted(
+                [path for path in backend_dir.iterdir() if path.is_dir()],
+                reverse=True,
+            )
+            for run_dir in candidates:
+                vectorizer = run_dir / "vectorizer.joblib"
+                model = run_dir / "model.joblib"
+                if vectorizer.exists() and model.exists():
+                    metrics_dir = run_dir / "metrics"
+                    return {
+                        "vectorizer": vectorizer,
+                        "model": model,
+                        "metadata": run_dir / "metadata.json",
+                        "metrics": metrics_dir / "metrics.json",
+                        "dataset_stats": metrics_dir / "dataset_stats.json",
+                        "run_dir": run_dir,
+                    }
 
     legacy_vectorizer = model_dir / "tfidf_char.joblib"
     legacy_model = model_dir / "logreg_model.joblib"
