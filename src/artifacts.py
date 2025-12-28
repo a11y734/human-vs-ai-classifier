@@ -57,7 +57,10 @@ def resolve_latest(model_dir: Path, backend: str) -> Dict[str, Path]:
     if latest_path.exists():
         with open(latest_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        paths = {k: backend_dir / v for k, v in data.get("paths", {}).items()}
+        normalized = {
+            k: str(v).replace("\\", "/") for k, v in data.get("paths", {}).items()
+        }
+        paths = {k: backend_dir / v for k, v in normalized.items()}
         paths["run_dir"] = backend_dir / data.get("run_id", "")
         return paths
 
