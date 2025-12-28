@@ -146,6 +146,56 @@ html, body, [class*="css"]  {
   border: 2px solid rgba(42, 157, 143, 0.5);
 }
 
+.result-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+  animation: fadeUp 0.6s ease-out both;
+}
+
+.result-banner.result-ai {
+  background: linear-gradient(135deg, #fb923c, #f97316);
+  color: #fff;
+}
+
+.result-banner.result-human {
+  background: linear-gradient(135deg, #0ea5e9, #1d4ed8);
+  color: #fff;
+}
+
+.result-banner.result-uncertain {
+  background: linear-gradient(135deg, #0f172a, #64748b);
+  color: #fff;
+}
+
+.result-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.result-meta {
+  font-size: 14px;
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+.result-chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
 .stat-label {
   font-size: 12px;
   color: var(--muted);
@@ -156,6 +206,11 @@ html, body, [class*="css"]  {
 .stat-card.card-label .stat-label,
 .stat-card.card-confidence .stat-label {
   color: rgba(255, 255, 255, 0.7);
+}
+
+.stat-card.card-label .stat-value {
+  font-size: 28px;
+  letter-spacing: 0.08em;
 }
 
 .stat-card .stat-label {
@@ -208,6 +263,15 @@ div[data-testid="stTextArea"] textarea {
   background: rgba(255, 255, 255, 0.95) !important;
 }
 
+@media (max-width: 720px) {
+  .hero h1 {
+    font-size: 26px;
+  }
+  .result-title {
+    font-size: 26px;
+  }
+}
+
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -220,8 +284,16 @@ LOW_CONF_THRESHOLD = 0.08
 
 st.set_page_config(page_title="中文 AI / 人類 文本判別器", layout="wide")
 st.markdown(THEME_CSS, unsafe_allow_html=True)
-st.title("中文 AI / 人類 文本判別器")
-st.caption("中英雙語版本 · TF-IDF + Logistic Regression / SVM")
+st.markdown(
+    """
+    <div class="hero">
+      <div class="hero-badge">AI / Human Detector</div>
+      <h1>中文 AI / 人類 文本判別器</h1>
+      <p>以文字特徵即時估算 AI 與人類機率，並提供信心提示與關鍵特徵。</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 @st.cache_resource
@@ -317,16 +389,37 @@ def main():
         st.stop()
 
     st.markdown(
-        "請貼上要判別的文字（中文 / 英文皆可），立即顯示 AI% / 人類% 與信心值，"
-        "並提供特徵解釋與評估視覺化。"
+        """
+        <div class="section-shell block-input">
+          <div class="section-title">輸入文本</div>
+          <div class="section-subtitle">貼上文字後開始判別</div>
+        """,
+        unsafe_allow_html=True,
     )
+    st.caption("請貼上要判別的文字（中文 / 英文皆可），立即顯示 AI% / 人類% 與信心值。")
     text = st.text_area("", height=160, label_visibility="collapsed")
     submitted = st.button("開始判別")
     if submitted and not text.strip():
         st.error("請先輸入文字。")
+    st.markdown("</div>", unsafe_allow_html=True)
 
     if submitted and text.strip():
         out = predictor.predict(text)
+        ai_pct = out["ai_prob"] * 100
+        human_pct = out["human_prob"] * 100
+        margin = abs(out["ai_prob"] - out["human_prob"])
+        margin_pct = margin * 100
+        low_conf = margin < LOW_CONF_THRESHOLD
+        if low_conf:
+            result_label = "不確定"
+            label_text = "低信心 · 不確定"
+            confidence_tag = "低信心"
+            result_class = "result-uncertain"
+        else:
+            result_label = "人類" if out["label"] == "Human" else "AI"
+            label_text = result_label
+            confidence_tag = "高信心"
+            result_class = "result-human" if out["label"] == "Human" else "result-ai"
         st.markdown(
             """
             <div class="section-shell block-result">
@@ -335,11 +428,19 @@ def main():
             """,
             unsafe_allow_html=True,
         )
+        st.markdown(
+            f"""
+            <div class="result-banner {result_class}">
+              <div>
+                <div class="result-title">{result_label}</div>
+                <div class="result-meta">AI {ai_pct:.1f}% · 人類 {human_pct:.1f}% · 差距 {margin_pct:.1f}%</div>
+              </div>
+              <div class="result-chip">{confidence_tag}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
         label_col, conf_col, prob_col = st.columns([1.1, 1.1, 1.8])
-        margin = abs(out["ai_prob"] - out["human_prob"])
-        label_text = "人類" if out["label"] == "Human" else out["label"]
-        if margin < LOW_CONF_THRESHOLD:
-            label_text = "低信心 · 不確定"
         label_col.markdown(
             f"""
             <div class="stat-card card-label">
@@ -358,9 +459,6 @@ def main():
             """,
             unsafe_allow_html=True,
         )
-        ai_pct = out["ai_prob"] * 100
-        human_pct = out["human_prob"] * 100
-        margin_pct = margin * 100
         prob_col.markdown(
             f"""
             <div class="stat-card card-prob">
@@ -376,7 +474,7 @@ def main():
             unsafe_allow_html=True,
         )
 
-        if margin < LOW_CONF_THRESHOLD:
+        if low_conf:
             st.warning(
                 f"低信心：AI 與人類機率差距 {margin_pct:.1f}% "
                 f"< 門檻 {LOW_CONF_THRESHOLD * 100:.0f}%。"
