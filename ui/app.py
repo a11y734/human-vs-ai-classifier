@@ -301,20 +301,6 @@ div[data-testid="stTextArea"] textarea {
 LOW_CONF_THRESHOLD = 0.08
 
 
-st.set_page_config(page_title="中文 AI / 人類 文本判別器", layout="wide")
-st.markdown(THEME_CSS, unsafe_allow_html=True)
-st.markdown(
-    """
-    <div class="hero">
-      <div class="hero-badge">AI / Human Detector</div>
-      <h1>中文 AI / 人類 文本判別器</h1>
-      <p>以文字特徵即時估算 AI 與人類機率，並提供信心提示與關鍵特徵。</p>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-
 @st.cache_resource
 def get_predictor(model_dir: str = "models", backend: str = "baseline"):
     return Predictor(Path(model_dir), backend=backend)
@@ -384,11 +370,23 @@ def metrics_section(paths: dict):
                 "pr_curve.png": "PR 曲線",
                 "text_length_hist.png": "文本長度分布",
             }.get(name, name)
-            cols[col_idx].image(str(img_path), caption=caption, use_container_width=True)
+            cols[col_idx].image(str(img_path), caption=caption, width="stretch")
             col_idx = (col_idx + 1) % 2
 
 
 def main():
+    st.set_page_config(page_title="中文 AI / 人類 文本判別器", layout="wide")
+    st.markdown(THEME_CSS, unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div class="hero">
+          <div class="hero-badge">AI / Human Detector</div>
+          <h1>中文 AI / 人類 文本判別器</h1>
+          <p>以文字特徵即時估算 AI 與人類機率，並提供信心提示與關鍵特徵。</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     repo_root = Path(__file__).resolve().parents[1]
     model_dir = repo_root / "models"
     with st.sidebar:
@@ -408,19 +406,12 @@ def main():
         st.stop()
 
     st.markdown(
-        """
-        <div class="section-shell block-input">
-          <div class="section-title">輸入文本</div>
-          <div class="section-subtitle">貼上文字後開始判別</div>
-        """,
-        unsafe_allow_html=True,
+        "請貼上要判別的文字（中文 / 英文皆可），立即顯示 AI% / 人類% 與信心值。"
     )
-    st.caption("請貼上要判別的文字（中文 / 英文皆可），立即顯示 AI% / 人類% 與信心值。")
-    text = st.text_area("", height=160, label_visibility="collapsed")
+    text = st.text_area("輸入文字", height=160, label_visibility="collapsed")
     submitted = st.button("開始判別")
     if submitted and not text.strip():
         st.error("請先輸入文字。")
-    st.markdown("</div>", unsafe_allow_html=True)
 
     if submitted and text.strip():
         out = predictor.predict(text)

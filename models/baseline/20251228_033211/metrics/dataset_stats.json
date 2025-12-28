@@ -1,0 +1,18 @@
+{
+  "total_samples": 4176,
+  "class_counts": {
+    "Human": 2088,
+    "AI": 2088
+  },
+  "text_length": {
+    "min": 1,
+    "mean": 123.10704022988506,
+    "median": 66.0,
+    "p95": 348.0,
+    "max": 3027
+  },
+  "language_counts": {
+    "en": 2088,
+    "zh": 2088
+  }
+}
